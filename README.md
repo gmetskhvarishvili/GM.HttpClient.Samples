@@ -55,8 +55,10 @@ Open the consumer API's **/swagger** and try:
 
 | Method | Route | Calls | Result |
 | --- | --- | --- | --- |
-| `GET`  | `/Sample` | `External` GET `/sample`  | `"test is successful"` |
-| `POST` | `/Sample` | `External2` POST `/sample` | echoed `SampleModel` |
+| `GET`  | `/api/v1/Sample` | `External` GET `/sample`  | `"test is successful"` |
+| `POST` | `/api/v1/Sample` | `External2` POST `/sample` | echoed `SampleModel` |
+
+The consumer API also exposes `/health/live` and `/health/ready`.
 
 ## Testing
 

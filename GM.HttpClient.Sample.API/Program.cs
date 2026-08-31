@@ -1,5 +1,6 @@
 using GM.HttpClient;
 using GM.HttpClient.Sample.API;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
 
 builder.Services.AddGMHttpClient<ISampleAPIService1, GMAPIClientOptions>(
     builder.Configuration.GetSection("ApiServices:SampleAPIService1"),
@@ -33,7 +35,16 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+// Liveness never checks downstream dependencies; readiness runs every registered health check
+// (none here yet). See engineering baseline §11.
+app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
+app.MapHealthChecks("/health/ready");
+
+await app.RunAsync();
 
 // Exposed so the integration test project can bootstrap the app via WebApplicationFactory.
-public partial class Program;
+public partial class Program
+{
+    // Only used as a WebApplicationFactory<Program> marker; never instantiated directly.
+    protected Program() { }
+}

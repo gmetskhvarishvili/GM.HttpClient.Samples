@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 using GM.HttpClient.Sample.API;
@@ -30,7 +31,7 @@ public class SampleEndpointsTests(WebApplicationFactory<Program> factory)
     {
         var client = CreateClientWithFakes();
 
-        var response = await client.GetAsync("/Sample");
+        var response = await client.GetAsync("/api/v1/Sample");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("test is successful", await response.Content.ReadAsStringAsync());
@@ -41,21 +42,37 @@ public class SampleEndpointsTests(WebApplicationFactory<Program> factory)
     {
         var client = CreateClientWithFakes();
 
-        var response = await client.PostAsync("/Sample", content: null);
+        var response = await client.PostAsync("/api/v1/Sample", content: null);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var model = await response.Content.ReadFromJsonAsync<SampleModel>();
         Assert.NotNull(model);
-        Assert.Equal(1, model!.Sample1);
+        Assert.Equal(1, model.Sample1);
         Assert.Equal("Test", model.Sample2);
     }
 
+    [Theory]
+    [InlineData("/health/live")]
+    [InlineData("/health/ready")]
+    public async Task Health_endpoints_report_healthy(string path)
+    {
+        var client = CreateClientWithFakes();
+
+        var response = await client.GetAsync(path);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [SuppressMessage("Major Code Smell", "S101:Types should be named in PascalCase",
+        Justification = "Name mirrors the ISampleAPIService1 interface it fakes; API is kept uppercase for consistency.")]
     private sealed class FakeSampleAPIService1 : ISampleAPIService1
     {
         public Task<string> GetSample(string request, CancellationToken cancellationToken)
             => Task.FromResult($"{request} is successful");
     }
 
+    [SuppressMessage("Major Code Smell", "S101:Types should be named in PascalCase",
+        Justification = "Name mirrors the ISampleAPIService2 interface it fakes; API is kept uppercase for consistency.")]
     private sealed class FakeSampleAPIService2 : ISampleAPIService2
     {
         public Task<SampleModel> PostSample(SampleModel request, CancellationToken cancellationToken)
