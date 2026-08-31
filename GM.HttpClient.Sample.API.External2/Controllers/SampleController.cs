@@ -17,6 +17,6 @@ public class SampleController : ControllerBase
 
 public class SampleModel
 {
-    public int Sample1 { get; set; }
+    public required int Sample1 { get; set; }
     public string? Sample2 { get; set; }
 }
